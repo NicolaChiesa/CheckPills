@@ -1,2 +1,2 @@
 # CheckPills
-Warning detector for medicine interactions
+ Application to detect possible dangerous interactions between medications
