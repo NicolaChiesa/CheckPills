@@ -2,10 +2,10 @@ import openai
 import streamlit as st 
 
 # Inserisci qui la tua API Key di OpenAI
-API_KEY = st.secrets["API_KEY"]
+# streAPI_KEY = st.secrets["API_KEY"]
 
-def check_drug_interactions(drugs):
-    client = openai.OpenAI(api_key=API_KEY)
+def check_drug_interactions(OPENAI_KEY, drugs):
+    client = openai.OpenAI(api_key=OPENAI_KEY)
     prompt = f"""Verifica se ci sono controindicazioni tra i seguenti farmaci:
     {', '.join(drugs)}
     
@@ -15,7 +15,6 @@ def check_drug_interactions(drugs):
       - **Controindicazione**: Spiegazione delle interazioni dannose tra i farmaci, e possibili conseguenze sul individuo
       - **Soluzione**: eventuali azioni da prendere (es. aspettare un intervallo di tempo prima di assumere il secondo farmaco)
     """
-    
     try:
         response = client.chat.completions.create(
             model="gpt-4",

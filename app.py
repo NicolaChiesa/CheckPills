@@ -1,8 +1,11 @@
 import streamlit as st
-from . import utils
+from modules import utils
 
 # UI Streamlit
 st.title("PillsChek ")
+
+st.markdown("Inserisci la tue chiave OpenAI:")
+OPENAI_KEY = st.text_input("Key: ")
 
 drugs_input = st.text_area("Inserisci i nomi dei farmaci separati da una virgola:")
 
@@ -13,7 +16,7 @@ if st.button("Verifica Interazioni"):
         st.error("Inserisci almeno due farmaci per la verifica.")
     else:
         with st.spinner("Analizzando le interazioni..."):
-            result = utils.check_drug_interactions(drugs)
+            result = utils.check_drug_interactions(OPENAI_KEY, drugs)
             st.subheader("Risultati:")
             
             # Formatta la risposta con Streamlit
