@@ -24,3 +24,12 @@ def check_drug_interactions(OPENAI_KEY, drugs):
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"Errore nella richiesta: {str(e)}"
+    
+# Funzione per aggiungere un nuovo campo
+def add_drug_input():
+    st.session_state.drug_list.append("")
+
+# Funzione per rimuovere un campo (opzionale)
+def remove_last_drug_input(i : int):
+    if len(st.session_state.drug_list) > 0:
+        st.session_state.drug_list.pop(i)
