@@ -1,15 +1,19 @@
 import streamlit as st
-from modules import utils
+from modules import utils, graphic_utils
 
 # UI Streamlit
 st.title("PillsCheck 💊")
-st.warning("L' applicazione è ancora in sviluppo, non è garantito il funzionamento")
+
+
+
+st.error("L' applicazione è ancora in sviluppo, non è garantito il funzionamento")
 st.header("Verifica le interazioni tra i tuoi farmaci!")
 st.markdown("""
 **PillsCheck** è un assistente intelligente che ti aiuta a identificare **interazioni pericolose tra farmaci**, 
 valutando il **livello di rischio** e suggerendo **soluzioni sicure**. Inserisci i nomi dei medicinali che stai assumendo 
 per scoprire eventuali **controindicazioni** o **effetti indesiderati**.
 """)
+
 
 with st.expander("📄 **Disclaimer medico**",expanded=True):
     st.warning("""
@@ -26,6 +30,9 @@ Prima di prendere decisioni sulla tua salute o modificare una terapia, **rivolgi
 with st.sidebar:
     st.header("🔐 Impostazioni")
     OPENAI_KEY = st.text_input("🔑 Chiave OpenAI", type="default", placeholder="sk-...")
+
+###### sidebar info ######
+graphic_utils.st_sidebar_info()
 
 st.divider()
 # Inizializza la lista dei farmaci nella sessione
