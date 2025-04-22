@@ -16,5 +16,4 @@ def st_sidebar_info():
             [WebSite](https://www.andreachiesa.it)
             """
         )
-        # st.success("if any problem was found, thanks")
-        # st.write('''---''')
+

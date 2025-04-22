@@ -1,12 +1,14 @@
 import streamlit as st
 from modules import utils, graphic_utils
-
-# UI Streamlit
+import json
+# Title and heder
 st.title("PillsCheck 💊")
 
 
+###### sidebar info ######
+graphic_utils.st_sidebar_info()
 
-st.error("L' applicazione è ancora in sviluppo, non è garantito il funzionamento")
+st.error("⚠️ L' applicazione è ancora in sviluppo ")
 st.header("Verifica le interazioni tra i tuoi farmaci!")
 st.markdown("""
 **PillsCheck** è un assistente intelligente che ti aiuta a identificare **interazioni pericolose tra farmaci**, 
@@ -15,7 +17,8 @@ per scoprire eventuali **controindicazioni** o **effetti indesiderati**.
 """)
 
 
-with st.expander("📄 **Disclaimer medico**",expanded=True):
+# Disclimer
+with st.expander("📄 **Disclaimer medico**",expanded=False):
     st.warning("""
 🔔 **Attenzione**  
 PillsCheck utilizza **l’intelligenza artificiale** per fornire suggerimenti solo a **scopo informativo**.  
@@ -26,19 +29,24 @@ Gli sviluppatori e i fornitori del servizio **declinano ogni responsabilità** p
 
 Prima di prendere decisioni sulla tua salute o modificare una terapia, **rivolgiti sempre al tuo medico o a un professionista sanitario qualificato**.
 """)
+st.divider()
 
-with st.sidebar:
-    st.header("🔐 Impostazioni")
-    OPENAI_KEY = st.text_input("🔑 Chiave OpenAI", type="default", placeholder="sk-...")
+# OpenAI key
+st.markdown("#### 🔐 Inserisci la tua chiave OpenAI")
+OPENAI_KEY = st.text_input("🔑 Inserisci la tua chiave OpenAI",
+                           label_visibility="collapsed",
+                           type="default",
+                           placeholder="sk-...")
 
-###### sidebar info ######
-graphic_utils.st_sidebar_info()
 
 st.divider()
 # Inizializza la lista dei farmaci nella sessione
 if "drug_list" not in st.session_state:
     st.session_state.drug_list = [""]
-
+if "interactions" not in st.session_state:
+    st.session_state.interactions = [""]
+if "generationDone" not in st.session_state:
+    st.session_state.generationDone = False
 
 # Mostra i campi di input per ciascun farmaco
 st.markdown("#### 💊 Farmaci da analizzare")
@@ -61,18 +69,39 @@ for i in range(len(st.session_state.drug_list)):
 
 
 # TODO let user add drug only if all fields are full 
-st.button("➕ Aggiungi farmaco", on_click=utils.add_drug_input)
+col1, col2, _= st.columns(3)
+with col1:
+    st.button("➕ Aggiungi farmaco", on_click=utils.add_drug_input, use_container_width=True)
+with col2:
+    submit = st.button("✅ Verifica Interazioni", key="verifica_interazioni", use_container_width=True)
 
-
-
-if st.button("Verifica Interazioni"):
+# Se si è premuto "Verifica Interazioni"
+if submit:
     if len(st.session_state["drug_list"]) < 2:
         st.error("Inserisci almeno due farmaci per la verifica.")
     else:
         with st.spinner("Analizzando le interazioni..."):
-            result = utils.check_drug_interactions(OPENAI_KEY, st.session_state["drug_list"])
-            st.subheader("Risultati:")
-            
-            # Formatta la risposta con Streamlit
-            for section in result.split("\n\n"):
-                st.markdown(section)
+            st.session_state["interactions"] = utils.check_drug_interactions(
+                OPENAI_KEY, st.session_state["drug_list"]
+            )
+            st.session_state["generationDone"] = True
+
+if st.session_state.get("generationDone"):
+    for interaction in st.session_state["interactions"].get("iterazioni", []):
+        with st.container(border=True):
+
+            if interaction['rischio'] == "alto":
+                st.markdown("**Rischio** : :red-badge[:material/Warning: Alto]")
+            if interaction['rischio'] == "medio":
+                st.markdown("**Rischio** : :orange-badge[:material/Notifications: Medio]")
+            if interaction['rischio'] == "basso":
+                st.markdown("**Rischio** : :green-badge[:material/Health_And_Safety: Basso]")
+
+            col1, col2, _ = st.columns(3)
+            with col1:
+                st.markdown(f"**Farmaco 1**: _{interaction['farmaco_1']}_")
+            with col2:
+                st.markdown(f"**Farmaco 2**: _{interaction['farmaco_2']}_")
+
+            st.markdown(f"**Controindicazione**: {interaction['controindicazione']}")
+            st.markdown(f"**Soluzione** : {interaction['soluzione']}")

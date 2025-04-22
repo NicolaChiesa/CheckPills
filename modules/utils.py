@@ -1,8 +1,8 @@
-import openai
+import openai 
+import json
 import streamlit as st 
 
-# Inserisci qui la tua API Key di OpenAI
-# streAPI_KEY = st.secrets["API_KEY"]
+
 
 def check_drug_interactions(OPENAI_KEY, drugs):
     client = openai.OpenAI(api_key=OPENAI_KEY)
@@ -15,13 +15,71 @@ def check_drug_interactions(OPENAI_KEY, drugs):
       - **Controindicazione**: Spiegazione delle interazioni dannose tra i farmaci, e possibili conseguenze sul individuo
       - **Soluzione**: eventuali azioni da prendere (es. aspettare un intervallo di tempo prima di assumere il secondo farmaco)
     """
+
+
     try:
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[{"role": "system", "content": "Sei un esperto di farmacologia."},
-                      {"role": "user", "content": prompt}]
+        response = client.responses.create(
+            model="gpt-4.1-nano",
+            input=[
+                {"role": "system", "content": "Sei un esperto di farmacologia. Il tuo obbiettivo è quello di controllare le "
+                "possibili controindicazioni che possono esserci tra l' assunzione di più farmaci. "},
+                {"role": "user", "content": prompt}],
+            temperature=0.3,
+            text={
+                "format": {
+                    "type": "json_schema",
+                    "name": "iterazioni_schema",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                        "iterazioni": {
+                            "type": "array",
+                            "description": "Una lista di oggetti che rappresentano le iterazioni tra farmaci.",
+                            "items": {
+                            "type": "object",
+                            "properties": {
+                                "farmaco_1": {
+                                "type": "string",
+                                "description": "Il primo farmaco coinvolto nell'iterazione."
+                                },
+                                "farmaco_2": {
+                                "type": "string",
+                                "description": "Il secondo farmaco coinvolto nell'iterazione."
+                                },
+                                "rischio": {
+                                "type": "string",
+                                "description": "Il rischio associato alla gravità dell' interazione tra i farmaci 'basso', medio' 'alto', 'ignoto'"
+                                },
+                                "controindicazione": {
+                                "type": "string",
+                                "description": "Controindicazione all'uso dei farmaci."
+                                },
+                                "soluzione": {
+                                "type": "string",
+                                "description": "La soluzione suggerita per affrontare il rischio."
+                                }
+                            },
+                            "required": [
+                                "farmaco_1",
+                                "farmaco_2",
+                                "rischio",
+                                "controindicazione",
+                                "soluzione"
+                            ],
+                            "additionalProperties": False
+                            }
+                        }
+                        },
+                        "required": [
+                        "iterazioni"
+                        ],
+                        "additionalProperties": False
+                    },
+                    "strict": True
+                    }
+            }
         )
-        return response.choices[0].message.content.strip()
+        return json.loads(response.output_text)
     except Exception as e:
         return f"Errore nella richiesta: {str(e)}"
     
